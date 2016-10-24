@@ -14,6 +14,8 @@ ID = 0 # initilize the global int ID to zero
 prev_ID = 0 # Initialize the global int prev_ID to zero for comparing the positive to negative edge
 first_time = 0 # to not make the detection for the first time
 
+#LUT for frecuencty to temp conversion
+f_to_t_array = [ [ 0.709, -40  ], [ 0.949, -35  ], [ 1.255, -30  ], [ 1.643, -25  ], [ 2.129, -20  ], [ 2.732, -15  ], [ 3.477, -10  ], [ 4.386, -5  ], [ 5.491, 0  ], [ 6.822, 5  ], [ 8.416, 10  ], [ 10.314, 15  ], [ 12.558, 20  ], [ 15.198, 25  ], [ 18.286, 30  ], [ 21.880, 35  ], [ 26.046, 40  ], [ 30.845, 45  ], [ 36.358, 50  ], [ 42.654, 55  ], [ 49.828, 60  ], [ 57.962, 65  ], [ 671.567, 70  ], [ 77.499, 75  ], [ 89.135, 80  ], [ 102.066, 85  ], [ 116.546, 90  ], [ 132.614, 95  ], [ 150.471, 100  ], [ 170.186, 105  ], [ 191.888, 110  ], [ 215.875, 115  ], [ 241.999, 120  ], [ 270.901, 125  ], [ 302.139, 130  ], [ 336.229, 135  ], [ 373.405, 140  ], [ 412.977, 145  ], [ 456.383, 150 ]]
 
 def foo():
     num_of_times = 100
@@ -133,6 +135,9 @@ def foo():
 
     prev_ID = ID     # to look at the one to zero and zero to one transitions
     first_time = 1
+
+def f_to_t(freq)
+
 
 
 
