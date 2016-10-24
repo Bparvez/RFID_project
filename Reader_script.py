@@ -17,7 +17,8 @@ prev_ID = 0 # Initialize the global int prev_ID to zero for comparing the positi
 first_time = 0 # to not make the detection for the first time
 
 #LUT for frecuencty to temp conversion
-f_to_t_array = [ [ 0.709, -40  ], [ 0.949, -35  ], [ 1.255, -30  ], [ 1.643, -25  ], [ 2.129, -20  ], [ 2.732, -15  ], [ 3.477, -10  ], [ 4.386, -5  ], [ 5.491, 0  ], [ 6.822, 5  ], [ 8.416, 10  ], [ 10.314, 15  ], [ 12.558, 20  ], [ 15.198, 25  ], [ 18.286, 30  ], [ 21.880, 35  ], [ 26.046, 40  ], [ 30.845, 45  ], [ 36.358, 50  ], [ 42.654, 55  ], [ 49.828, 60  ], [ 57.962, 65  ], [ 671.567, 70  ], [ 77.499, 75  ], [ 89.135, 80  ], [ 102.066, 85  ], [ 116.546, 90  ], [ 132.614, 95  ], [ 150.471, 100  ], [ 170.186, 105  ], [ 191.888, 110  ], [ 215.875, 115  ], [ 241.999, 120  ], [ 270.901, 125  ], [ 302.139, 130  ], [ 336.229, 135  ], [ 373.405, 140  ], [ 412.977, 145  ], [ 456.383, 150 ]]
+t_array = [ -40, -35, -30, -25, -20, -15, -10, -5, 0, 5, 10, 15,  20,  25,  30, 35, 40, 45, 50, 55, 60,  65, 70, 75, 80, 85, 90, 95, 100, 105, 110, 115, 120, 125, 130, 135, 140, 145, 150]
+f_array = [ 0.709,  0.949,  1.255,  1.643,  2.129, 2.732, 3.477, 4.386, 5.491,  6.822,  8.416, 10.314, 12.558,  15.198, 18.286, 21.880,  26.046,  30.845, 36.358,  42.654,  49.828,  57.962,  671.567,  77.499, 89.135, 102.066,  116.546, 132.614 ]
 
 def foo():
     num_of_times = 100
@@ -162,8 +163,24 @@ def freq_print():
     threading.Timer(0.5, freq_print).start()
 
 
+    done = false 
+    for i in range(len(f_array)-1)
+        if(temp == f_array[i]:
+            temp = t_array[i]
+            done = true
 
+        if((temp >= f_array[i]) and (temp <= f_array[i+1])):
+            temp = freq * (t_array[i] - t_array[i+1]) / (f_array[i] - f_array[i+1]) 
+            done = true 
 
+    if(temp == f_array[-1]:  #compare with the last element 
+        temp = t_array[i]
+        done = true
+     
+    if (done == false)
+        return false
+
+    return temp
 
 
 foo()
