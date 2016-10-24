@@ -1,0 +1,10 @@
+Get first reading
+
+Store negative to positive transition in an array, time stamping it
+Store positive to negative transition in an array, time stamping it  -- Can and cannot be used
+
+Remove the irregularities by the rate of change
+
+Calculate the frequency by F = 1 / tn+1 + tn
+
+Average the frequency over some time, smooth it and then display it 
