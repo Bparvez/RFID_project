@@ -4,6 +4,8 @@ import io                  # importing python libraries
 import sys
 import serial              # for the timer and the duration of the loop
 import time, threading     # for time stamping and threading
+import numpy as np    # for the mean
+
 
 
 pos_array = []   # array to store time stamped negative to positive edge/change values
@@ -113,7 +115,7 @@ def foo():
     tiser.close()
 
 
-    # print  "I am getting" , ID
+    #print  "I am getting" , ID
     if first_time == 1:
         ts = time.time()     # ts is the time
         if (ID != prev_ID):               # To look for the edge transitions
@@ -124,6 +126,7 @@ def foo():
 
     if n < num_of_times:
         threading.Timer(0.125, foo).start()
+        #print pos_array
         if (len(pos_array) > 2):
             for n in range(1,len(pos_array)):
                 frequency =  (1/(pos_array[n]-pos_array[n-1]))
@@ -146,15 +149,18 @@ def freq_print():
     global frequency_array
     frequency = 0
     new_frequency_array =[] # to hold the values
-    if (len(frequency_array) > 2):
+    #print frequency_array
+    if (len(frequency_array) > 6):
         new_frequency_array = sorted(frequency_array)
-        for n in range(something, len(new_frequency_array)-2):
-            frequency = frequency_array[]
+        # for n in range(2, len(new_frequency_array)-2):
+        #     frequency = (frequency_array[n] + frequency) / 2
+        endvalue = int(len(new_frequency_array)- 2)
+        new_frequency_array = new_frequency_array[2:endvalue]
+        frequency = np.mean(new_frequency_array)
 
-    print 'Frequency is ' , frequency_array
+    print 'Frequency is ' , frequency
     threading.Timer(0.5, freq_print).start()
 
-def f_to_t(freq)
 
 
 
