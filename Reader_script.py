@@ -125,9 +125,10 @@ def foo():
         # print 'Negative array:',(neg_array)
         print 'Positive array:',(pos_array)
         for n in range(len(pos_array)):
-            frequency =  (1/(pos_array[n+1]-pos_array[n]))
+            frequency =  (1/(pos_array[n]-pos_array[n-1]))
+            frequency_array.append(frequency)
 
-        print 'Frequency is ' , frequency
+        print 'Frequency is ' , frequency_array
         print 'Temperature is blah blah'
 
     prev_ID = ID     # to look at the one to zero and zero to one transitions
