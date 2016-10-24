@@ -22,6 +22,8 @@ def foo():
     global pos_array, neg_array
     global ID , prev_ID
     global first_time
+    global frequency_array
+
     n = n+1
     ID = 0       # Initialize ID to zero for the next thread
     if len(sys.argv) < 2 :
@@ -123,17 +125,25 @@ def foo():
 
     if n == num_of_times:              # for displaying at the moment, not for the final code
         # print 'Negative array:',(neg_array)
-        print 'Positive array:',(pos_array)
-        for n in range(len(pos_array)):
-            frequency =  (1/(pos_array[n]-pos_array[n-1]))
-            frequency_array.append(frequency)
+        #print 'Positive array:',(pos_array)
 
-        print 'Frequency is ' , frequency_array
+
         print 'Temperature is blah blah'
 
     prev_ID = ID     # to look at the one to zero and zero to one transitions
     first_time = 1
 
+def freq_print():
+    global frequency_array
+    if (len(frequency_array) > 2):
+        for n in range(1,len(pos_array)):
+            frequency =  (1/(pos_array[n]-pos_array[n-1]))
+            frequency_array.append(frequency)
+    print 'Frequency is ' , frequency_array
+    threading.Timer(0.5, freq_print).start()
+
+
 
 
 foo()
+freq_print()
