@@ -123,6 +123,7 @@ def foo():
     if n < num_of_times:
         threading.Timer(0.125, foo).start()
 
+
     if n == num_of_times:              # for displaying at the moment, not for the final code
         # print 'Negative array:',(neg_array)
         #print 'Positive array:',(pos_array)
@@ -139,6 +140,7 @@ def freq_print():
         for n in range(1,len(pos_array)):
             frequency =  (1/(pos_array[n]-pos_array[n-1]))
             frequency_array.append(frequency)
+
     print 'Frequency is ' , frequency_array
     threading.Timer(0.5, freq_print).start()
 
