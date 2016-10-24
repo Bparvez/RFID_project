@@ -25,6 +25,8 @@ def foo():
     global pos_array, neg_array
     global ID , prev_ID
     global first_time
+    global frequency_array
+
     n = n+1
     ID = 0       # Initialize ID to zero for the next thread
     if len(sys.argv) < 2 :
@@ -112,7 +114,7 @@ def foo():
     tiser.close()
 
 
-    print  "I am getting" , ID
+    # print  "I am getting" , ID
     if first_time == 1:
         ts = time.time()     # ts is the time
         if (ID != prev_ID):               # To look for the edge transitions
@@ -123,19 +125,35 @@ def foo():
 
     if n < num_of_times:
         threading.Timer(0.125, foo).start()
+        if (len(pos_array) > 2):
+            for n in range(1,len(pos_array)):
+                frequency =  (1/(pos_array[n]-pos_array[n-1]))
+                frequency_array.append(frequency)
 
-    if n == num_of_times:              # for displaying at the moment, not for the final code
-        # print 'Negative array:',(neg_array)
-        print 'Positive array:',(pos_array)
-        for n in range(len(pos_array)):
-            frequency =  (1/(pos_array[n]-pos_array[n-1]))
-            frequency_array.append(frequency)
 
-        print 'Frequency is ' , frequency_array
-        print 'Temperature is blah blah'
+
+    # if n == num_of_times:              # for displaying at the moment, not for the final code
+    #     # print 'Negative array:',(neg_array)
+    #     #print 'Positive array:',(pos_array)
+    #
+    #
+    #     print 'Temperature is blah blah'
 
     prev_ID = ID     # to look at the one to zero and zero to one transitions
     first_time = 1
+
+
+def freq_print():
+    global frequency_array
+    frequency = 0
+    new_frequency_array =[] # to hold the values
+    if (len(frequency_array) > 2):
+        new_frequency_array = sorted(frequency_array)
+        for n in range(something, len(new_frequency_array)-2):
+            frequency = frequency_array[]
+
+    print 'Frequency is ' , frequency_array
+    threading.Timer(0.5, freq_print).start()
 
 def f_to_t(freq)
 
@@ -158,4 +176,6 @@ def f_to_t(freq)
 
     return temp
 
+
 foo()
+freq_print()
