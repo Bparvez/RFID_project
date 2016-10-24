@@ -8,13 +8,22 @@ import time, threading     # for time stamping and threading
 
 pos_array = []   # array to store time stamped negative to positive edge/change values
 neg_array = []   # array to store time stamped positive to negative edge/change values
+frequency_array = [] # array to store the calculated frequency values
 n = 0  # int to terminate the loop after some number of times, and for the array
+ID = 0 # initilize the global int ID to zero
+prev_ID = 0 # Initialize the global int prev_ID to zero for comparing the positive to negative edge
+first_time = 0 # to not make the detection for the first time
+
 
 def foo():
+    num_of_times = 100
+    frequency = 0
     global n
     global pos_array, neg_array
+    global ID , prev_ID
+    global first_time
     n = n+1
-    ID = 0       # Initialize ID to zero for the next thread 
+    ID = 0       # Initialize ID to zero for the next thread
     if len(sys.argv) < 2 :
         print ("Usage: " + sys.argv[0] + " serial_port_to_use")
         sys.exit()
@@ -101,11 +110,29 @@ def foo():
 
 
     print  "I am getting" , ID
+    if first_time == 1:
+        ts = time.time()     # ts is the time
+        if (ID != prev_ID):               # To look for the edge transitions
+            if ID == 0:                   # It is not equal and it changed to zero now that means there is a positive to negative transition
+                neg_array.append(ts)
+            else:                         # else it is a negative to positive transitions
+                pos_array.append(ts)
 
-    if
-
-    if n < 1000:
+    if n < num_of_times:
         threading.Timer(0.125, foo).start()
+
+    if n == num_of_times:              # for displaying at the moment, not for the final code
+        # print 'Negative array:',(neg_array)
+        print 'Positive array:',(pos_array)
+        for n in range(len(pos_array)):
+            frequency =  (1/(pos_array[n+1]-pos_array[n]))
+
+        print 'Frequency is ' , frequency
+        print 'Temperature is blah blah'
+
+    prev_ID = ID     # to look at the one to zero and zero to one transitions
+    first_time = 1
+
 
 
 foo()
