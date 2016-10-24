@@ -18,7 +18,7 @@ first_time = 0 # to not make the detection for the first time
 
 #LUT for frecuencty to temp conversion
 t_array = [ -40, -35, -30, -25, -20, -15, -10, -5, 0, 5, 10, 15,  20,  25,  30, 35, 40, 45, 50, 55, 60,  65, 70, 75, 80, 85, 90, 95, 100, 105, 110, 115, 120, 125, 130, 135, 140, 145, 150]
-f_array = [ 0.709,  0.949,  1.255,  1.643,  2.129, 2.732, 3.477, 4.386, 5.491,  6.822,  8.416, 10.314, 12.558,  15.198, 18.286, 21.880,  26.046,  30.845, 36.358,  42.654,  49.828,  57.962,  671.567,  77.499, 89.135, 102.066,  116.546, 132.614 ]
+f_array = [ 0.0709,  0.0949,  0.1255,  0.1643,  0.2129, 0.2732, 0.3477, 0.4386, 0.5491,  0.6822,  0.8416, 1.0314, 1.2558,  1.5198, 1.8286, 2.1880,  2.6046,  3.0845, 3.6358,  4.2654,  4.9828,  5.7962,  6.71567,  7.7499, 8.9135, 10.2066,  11.6546, 13.2614 ]
 
 def foo():
     num_of_times = 100
@@ -132,6 +132,10 @@ def foo():
             for n in range(1,len(pos_array)):
                 frequency =  (1/(pos_array[n]-pos_array[n-1]))
                 frequency_array.append(frequency)
+                print 'Frequency real-time is ' , frequency
+                Temperature = f_2_t(frequency)
+                print 'Temperature real-time is ' , Temperature
+                threading.Timer(0.5, freq_print).start()
 
 
 
@@ -153,32 +157,32 @@ def freq_print():
     #print frequency_array
     if (len(frequency_array) > 6):
         new_frequency_array = sorted(frequency_array)
-        # for n in range(2, len(new_frequency_array)-2):
-        #     frequency = (frequency_array[n] + frequency) / 2
-        endvalue = int(len(new_frequency_array)- 2)
-        new_frequency_array = new_frequency_array[2:endvalue]
+        new_frequency_array = new_frequency_array[2:(len(new_frequency_array)- 2)]
         frequency = np.mean(new_frequency_array)
 
-    print 'Frequency is ' , frequency
+    #print 'Frequency is ' , frequency
+    #Temperature = f_2_t(frequency)
+    #print 'Temperature is ' , Temperature
     threading.Timer(0.5, freq_print).start()
 
+def f_2_t(freq):
 
-    done = false 
-    for i in range(len(f_array)-1)
-        if(temp == f_array[i]:
+    done = False
+    for i in range(len(f_array)-1):
+        if(freq == f_array[i]):
             temp = t_array[i]
-            done = true
+            done = True
 
-        if((temp >= f_array[i]) and (temp <= f_array[i+1])):
-            temp = freq * (t_array[i] - t_array[i+1]) / (f_array[i] - f_array[i+1]) 
-            done = true 
+        if((freq >= f_array[i]) and (freq <= f_array[i+1])):
+            temp = freq * (t_array[i] - t_array[i+1]) / (f_array[i] - f_array[i+1])
+            done = True
 
-    if(temp == f_array[-1]:  #compare with the last element 
+    if(freq == f_array[-1]):  #compare with the last element
         temp = t_array[i]
-        done = true
-     
-    if (done == false)
-        return false
+        done = True
+
+    if (done == False):
+        return False
 
     return temp
 
