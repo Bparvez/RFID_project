@@ -7,6 +7,7 @@ import time, threading     # for time stamping and threading
 import numpy as np    # for the mean
 
 size_of_arrays = 10
+size_of_pos_edges_array = 10
 pos_array = list()   # array to store time stamped negative to positive edge/change values
 neg_array = list()   # array to store time stamped positive to negative edge/change values , bot using it at the moment
 frequency_array = list() # array to store the calculated frequency values
@@ -21,7 +22,7 @@ f_array = [ 0.0709,  0.0949,  0.1255,  0.1643,  0.2129, 0.2732, 0.3477, 0.4386, 
 
 
 #-------------------------------------------------------------------
-# Function: 
+# Function: main 
 # Description: 
 #
 #-------------------------------------------------------------------
@@ -31,14 +32,13 @@ def main():
     frequency = 0
     global size_of_arrays
     global n
-    global pos_array, neg_array
+    global pos_array, neg_array, filtered_all_values_array, all_values_array
     global ID , prev_ID
     global first_time
     global frequency_array
 
-
-    n = n+1
     ID = 0       # Initialize ID to zero for the next thread
+
     if len(sys.argv) < 2 :
         print ("Usage: " + sys.argv[0] + " serial_port_to_use")
         sys.exit()
@@ -82,6 +82,7 @@ def main():
     command[command_len - 2] = chksum  # 1st byte is the checksum
     command[command_len - 1] = chksum ^ 0xff  # 2nd byte is ones comp of the checksum
 
+    #Continuos execution loop to calculate
     while(True):
 
         try:
@@ -115,7 +116,6 @@ def main():
 
                 if response[7] == 0x01:
 
-
                     prev_ID = ID     # to look at the one to zero and zero to one transitions
 
                     ID = str("0x%0.2X" % response[20] + "%0.2X" % response[19]
@@ -127,56 +127,50 @@ def main():
                         if (ID != 0):              # It is not equal and it changed to zero now that means there is a positive to negative transition
                             ts = time.time()       # ts is the time
                             pos_array.append(ts)
-                            if (len(pos_array) > size_of_arrays):
+                            if (len(pos_array) > size_of_pos_edges_array):
                                 pos_array.pop(0)
 
                 else:
                     ID = 0
 
-                if (len(pos_array) > 2):
-                    for n in range(1,len(pos_array)):
-                        frequency =  (1/(pos_array[n]-pos_array[n-1]))
+                #Build the all values array to be filtered
+                ts = time.time()       # ts is the time
+                all_values_array.append(ts)
+                if (len(all_values_array) > size_of_arrays):
+                    all_values_array.pop(0)
+
+                filtered_all_values_array = filter_glitches(all_values_array)
+                 
+                #We will wait until the edges array is full
+                if( len(filtered_all_values_array) => size_of_pos_edges_array): 
+                    if((filtered_all_values_array[0] == 0) and (filtered_all_values_array[1] != 0)):
+                        #load the edge
+                        #TODO
+                        #then load the next edge
+                        #TODO
+                        #then calculate the frecuency
+                        frequency = (1/(filtered_all_values_array[0]-filtered_all_values_array[1]))
                         frequency_array.append(frequency)
-                        #print frequency
-                        if (len(frequency_array) > size_of_arrays):
-                            frequency_array.pop(0)
+                            if (len(frequency_array) > size_of_arrays):
+                                frequency_array.pop(0)
 
-                print  "I am getting" , ID
-                #tiser.close()
+                
+                #Here we populate the frequency_array which contains all the samples
+                #if (len(pos_array) > 2):
+                #    for n in range(1,len(pos_array)):
+                #        frequency =  (1/(pos_array[n]-pos_array[n-1]))
+                #        frequency_array.append(frequency)
+                #        #print frequency
+                #        if (len(frequency_array) > size_of_arrays):
+                #            frequency_array.pop(0)
 
+                #print  "I am getting" , ID
 
             freq_print()
 
         except KeyboardInterrupt:
             tiser.close() # close and turn down the light
             break # Exit while(True)
-
-    #if first_time == 1:
-    #    ts = time.time()     # ts is the time
-    #    if (ID != prev_ID):               # To look for the edge transitions
-    #        if ID == 0:                   # It is not equal and it changed to zero now that means there is a positive to negative transition
-    #            neg_array.append(ts)
-    #            if (len(neg_array) > size_of_arrays):
-    #                neg_array.pop(0)
-    #        else:                         # else it is a negative to positive transitions
-    #            pos_array.append(ts)
-    #            if (len(pos_array) > size_of_arrays):
-    #                pos_array.pop(0)
-
-    #if n < num_of_times:
-    #    threading.Timer(0.125, foo).start()
-    #    #print frequency_array
-    #    if (len(pos_array) > 2):
-    #        for n in range(1,len(pos_array)):
-    #            frequency =  (1/(pos_array[n]-pos_array[n-1]))
-    #            frequency_array.append(frequency)
-    #            #print frequency
-    #            if (len(frequency_array) > size_of_arrays):
-    #                frequency_array.pop(0)
-
-
-    #prev_ID = ID     # to look at the one to zero and zero to one transitions
-    #first_time = 1
 
 
 #-------------------------------------------------------------------
@@ -192,7 +186,9 @@ def freq_print():
     global frequency_array
     frequency = 0
     new_frequency_array =[] # to hold the values
+    
     #print frequency_array
+
     if (len(frequency_array) > 6):
         #print 'yes'
         new_frequency_array = sorted(frequency_array)
@@ -203,8 +199,9 @@ def freq_print():
         #print 'Temperature is ' , Temperature
 
 #-------------------------------------------------------------------
-# Function: 
-# Description: 
+# Function: f_2_t 
+# Description: calculate the temperature with the LUT with frequency
+# as input.
 #
 #-------------------------------------------------------------------
 def f_2_t(freq):
@@ -228,6 +225,20 @@ def f_2_t(freq):
 
     return temp
 
+#-------------------------------------------------------------------
+# Function: filter 
+# Description: filter low frecuency glitches from the samples 
+# as input. The array element are time stamps 
+#
+#-------------------------------------------------------------------
+def filter_glitches(unfiltered_array)
 
-# main
+    filtered_array = unfiltered_array # array to be returned  
+
+    if (len(filtered_array) > 3): #safety check
+        if((filtered_array[-1] != 0) and (filtered_array[-2] == 0) and (filtered_array[-3] != 0)): 
+            filtered_array[-2] = filtered_array[-1] + ((filtered_array[-3] - filtered_array[-1])/2)
+    return filtered_array
+
+# ++++++++++++++++++++++  main ++++++++++++++++++++++++++++++++++++++++
 main()
