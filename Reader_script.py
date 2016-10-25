@@ -7,10 +7,17 @@ import time, threading     # for time stamping and threading
 import numpy as np    # for the mean
 
 
+# for implementing a stack , or a fifo queue
+# stack = list()
+# stack.append(values)
+# stack.pop(0)
+# end of the fifo queue
 
-pos_array = []   # array to store time stamped negative to positive edge/change values
-neg_array = []   # array to store time stamped positive to negative edge/change values
-frequency_array = [] # array to store the calculated frequency values
+
+size_of_arrays = 10
+pos_array = list()   # array to store time stamped negative to positive edge/change values
+neg_array = list()   # array to store time stamped positive to negative edge/change values , bot using it at the moment
+frequency_array = list() # array to store the calculated frequency values
 n = 0  # int to terminate the loop after some number of times, and for the array
 ID = 0 # initilize the global int ID to zero
 prev_ID = 0 # Initialize the global int prev_ID to zero for comparing the positive to negative edge
@@ -23,11 +30,13 @@ f_array = [ 0.0709,  0.0949,  0.1255,  0.1643,  0.2129, 0.2732, 0.3477, 0.4386, 
 def foo():
     num_of_times = 100
     frequency = 0
+    global size_of_arrays
     global n
     global pos_array, neg_array
     global ID , prev_ID
     global first_time
     global frequency_array
+
 
     n = n+1
     ID = 0       # Initialize ID to zero for the next thread
@@ -122,48 +131,46 @@ def foo():
         if (ID != prev_ID):               # To look for the edge transitions
             if ID == 0:                   # It is not equal and it changed to zero now that means there is a positive to negative transition
                 neg_array.append(ts)
+                if (len(neg_array) > size_of_arrays):
+                    neg_array.pop(0)
             else:                         # else it is a negative to positive transitions
                 pos_array.append(ts)
+                if (len(pos_array) > size_of_arrays):
+                    pos_array.pop(0)
 
     if n < num_of_times:
         threading.Timer(0.125, foo).start()
-        #print pos_array
+        #print frequency_array
         if (len(pos_array) > 2):
             for n in range(1,len(pos_array)):
                 frequency =  (1/(pos_array[n]-pos_array[n-1]))
                 frequency_array.append(frequency)
-                print 'Frequency real-time is ' , frequency
-                Temperature = f_2_t(frequency)
-                print 'Temperature real-time is ' , Temperature
-                threading.Timer(0.5, freq_print).start()
+                #print frequency
+                if (len(frequency_array) > size_of_arrays):
+                    frequency_array.pop(0)
 
-
-
-    # if n == num_of_times:              # for displaying at the moment, not for the final code
-    #     # print 'Negative array:',(neg_array)
-    #     #print 'Positive array:',(pos_array)
-    #
-    #
-    #     print 'Temperature is blah blah'
 
     prev_ID = ID     # to look at the one to zero and zero to one transitions
     first_time = 1
 
 
 def freq_print():
+    #print 'yes'
     global frequency_array
     frequency = 0
     new_frequency_array =[] # to hold the values
     #print frequency_array
     if (len(frequency_array) > 6):
+        print 'yes'
         new_frequency_array = sorted(frequency_array)
         new_frequency_array = new_frequency_array[2:(len(new_frequency_array)- 2)]
         frequency = np.mean(new_frequency_array)
+        print 'Frequency is ' , frequency
+        Temperature = f_2_t(frequency)
+        print 'Temperature is ' , Temperature
 
-    #print 'Frequency is ' , frequency
-    #Temperature = f_2_t(frequency)
-    #print 'Temperature is ' , Temperature
     threading.Timer(0.5, freq_print).start()
+
 
 def f_2_t(freq):
 
