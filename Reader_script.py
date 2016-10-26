@@ -22,6 +22,7 @@ import sys
 import serial              # for the timer and the duration of the loop
 import time, threading     # for time stamping and threading
 import numpy as np         # for the mean
+import os
 
 size_of_arrays = 10
 size_of_pos_edges_array = 10
@@ -30,6 +31,7 @@ neg_array = list()   # array to store time stamped positive to negative edge/cha
 frequency_array = list() # array to store the calculated frequency values
 all_values_array = list() # array to store all the time stamps of the reading either 0 on non presence of the tag, or time stamp on tag presence
 filtered_all_values_array = list() #array to store the time stamps values after filtering
+wave_form = list()
 n = 0  # int to terminate the loop after some number of times, and for the array
 ID = 0 # initilize the global int ID to zero
 prev_ID = 0 # Initialize the global int prev_ID to zero for comparing the positive to negative edge
@@ -37,8 +39,7 @@ first_time = 0 # to not make the detection for the first time
 
 #LUT for frecuencty to temp conversion
 t_array = [ -40, -35, -30, -25, -20, -15, -10, -5, 0, 5, 10, 15,  20,  25,  30, 35, 40, 45, 50, 55, 60,  65, 70, 75, 80, 85, 90, 95, 100, 105, 110, 115, 120, 125, 130, 135, 140, 145, 150]
-f_array = [ 0.0709,  0.0949,  0.1255,  0.1643,  0.2129, 0.2732, 0.3477, 0.4386, 0.5491,  0.6822,  0.8416, 1.0314, 1.2558,  1.5198, 1.8286, 2.1880,  2.6046,  3.0845, 3.6358,  4.2654,  4.9828,  5.7962,  6.71567,  7.7499, 8.9135, 10.2066,  11.6546, 13.2614 ]
-
+f_array = [ 0.015, 0.020, 0.027, 0.035, 0.045, 0.058, 0.074, 0.093, 0.117, 0.145, 0.179, 0.219, 0.267, 0.323, 0.389, 0.466, 0.554, 0.656, 0.774, 0.908, 1.060, 1.233, 1.429, 1.649, 1.896, 2.172, 2.480, 2.822, 3.202, 3.621, 4.083, 4.593, 5.149, 5.764, 6.428, 7.154, 7.945, 8.787, 9.710] 
 
 #-------------------------------------------------------------------
 # Function: main
@@ -52,7 +53,7 @@ def main():
     frequency = 0
     global size_of_arrays
     global n
-    global pos_array, neg_array, filtered_all_values_array, all_values_array
+    global pos_array, neg_array, filtered_all_values_array, all_values_array, wave_form
     global ID , prev_ID
     global first_time
     global frequency_array
@@ -149,10 +150,16 @@ def main():
                     #        if (len(pos_array) > size_of_pos_edges_array):
                     #            pos_array.pop(0)
                     ts = time.time()       # ts is the time
-
+                    wave_form.append("|")
                 else:
                     ID = 0
                     ts = 0
+                    wave_form.append("_")
+
+                if(len(wave_form)>10):
+                    wave_form.pop(0)
+                os.system('clear')
+                print wave_form
 
                 #Build the all values array to be filtered
                 all_values_array.append(ts)
@@ -161,9 +168,10 @@ def main():
                 #print all_values_array 
 
                 #filter the glitches
+                #filtered_all_values_array = all_values_array
                 filtered_all_values_array = filter_glitches(all_values_array)
 
-                print filtered_all_values_array 
+                #print filtered_all_values_array 
 
                 #We will wait until the edges array is full
                 if(len(filtered_all_values_array) >= size_of_arrays):
@@ -175,13 +183,15 @@ def main():
 
                 #Here we populate the frequency_array which contains all the samples
                 if (len(pos_array) > 2):
-                    for n in range(1,len(pos_array)):
-                        frequency = (1/(pos_array[n]-pos_array[n-1]))
-                        frequency_array.append(frequency)
-                        #print frequency
-                        if (len(frequency_array) > size_of_arrays):
-                            frequency_array.pop(0)
 
+                    #for n in range(1,len(pos_array)):
+                    frequency = (1/(pos_array[1]-pos_array[0]))
+                    frequency_array.append(frequency)
+                    #print frequency
+                    if (len(frequency_array) > size_of_arrays):
+                        frequency_array.pop(0)
+
+                #print frequency_array
                 #print  "I am getting" , ID
 
             freq_print()
@@ -215,9 +225,12 @@ def freq_print():
         new_frequency_array = sorted(frequency_array)
         new_frequency_array = new_frequency_array[2:(len(new_frequency_array)- 2)]
         frequency = np.mean(new_frequency_array)
-        #print 'Frequency is ' , frequency
+
+        #Rounding for our precision
+        frequency = int((frequency * 8 + 0.5)) / 8.0
+        print 'Frequency is ' , frequency
         Temperature = f_2_t(frequency)
-        #print 'Temperature is ' , Temperature
+        print 'Temperature is ' , Temperature
 
 #-------------------------------------------------------------------
 # Function: f_2_t
@@ -234,7 +247,7 @@ def f_2_t(freq):
             done = True
 
         if((freq >= f_array[i]) and (freq <= f_array[i+1])):
-            temp = freq * (t_array[i] - t_array[i+1]) / (f_array[i] - f_array[i+1])
+            temp = ((freq-f_array[i]) * (5.0 / (f_array[i+1] - f_array[i])) ) + t_array[i] 
             done = True
 
     if(freq == f_array[-1]):  #compare with the last element
