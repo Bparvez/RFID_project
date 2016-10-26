@@ -1,7 +1,5 @@
 #!/usr/bin/env python
 
-
-#
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
 #    the Free Software Foundation, either version 3 of the License, or
@@ -15,8 +13,6 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
-# Mark T. Smith 2016
-#
 
 
 # This code is for using an OOK on a temperature sensor 
@@ -25,13 +21,15 @@ import io                  # importing python libraries
 import sys
 import serial              # for the timer and the duration of the loop
 import time, threading     # for time stamping and threading
-import numpy as np    # for the mean
+import numpy as np         # for the mean
 
 size_of_arrays = 10
 size_of_pos_edges_array = 10
 pos_array = list()   # array to store time stamped negative to positive edge/change values
 neg_array = list()   # array to store time stamped positive to negative edge/change values , bot using it at the moment
 frequency_array = list() # array to store the calculated frequency values
+all_values_array = list() # array to store all the time stamps of the reading either 0 on non presence of the tag, or time stamp on tag presence
+filtered_all_values_array = list() #array to store the time stamps values after filtering
 n = 0  # int to terminate the loop after some number of times, and for the array
 ID = 0 # initilize the global int ID to zero
 prev_ID = 0 # Initialize the global int prev_ID to zero for comparing the positive to negative edge
@@ -44,7 +42,8 @@ f_array = [ 0.0709,  0.0949,  0.1255,  0.1643,  0.2129, 0.2732, 0.3477, 0.4386, 
 
 #-------------------------------------------------------------------
 # Function: main
-# Description:
+# Description: The function creates a command to send through a
+# serial line to TI S6350 RFID reader
 #
 #-------------------------------------------------------------------
 def main():
@@ -74,7 +73,6 @@ def main():
         print ("Under windows use the communication port name, ie COM8")
         sys.exit()
 
-
     read_transponder_details = [0x01, 0, 0, 0, 0, 0, 0x60]  # the ISO wrapper
 
     read_transponder_details.extend([0x11, 0x27, 0x01, 0])
@@ -103,77 +101,6 @@ def main():
     command[command_len - 2] = chksum  # 1st byte is the checksum
     command[command_len - 1] = chksum ^ 0xff  # 2nd byte is ones comp of the checksum
 
-<<<<<<< HEAD
-    # Send out the command to the reader
-
-    tiser.write(memoryview(command))  # memoryview is the same as buffer
-
-
-    line_size = tiser.read(2)  # first pass, read first two bytes of reply
-
-    if len(line_size) < 2:
-        print ("No data returned.  Is the reader turned on?")
-        tiser.close()
-        sys.exit()
-
-    # second pass
-
-    line_data = tiser.read((ord(line_size[1]) - 2))  # get the rest of the reply
-
-
-    response_len = ord(line_size[1]) # this is the length of the entire response
-    response = []
-    idx = 0
-
-    response.append(ord(line_size[0])) # response SOF
-    response.append(ord(line_size[1])) # response size
-    # In the next line the -2 accounts for the SOF and size bytes done above.
-    while idx < (response_len - 2): # do the rest of the response
-        response.append(ord(line_data[idx]))
-        idx += 1
-
-
-    if response[7] == 0x01:
-
-        ID = str("0x%0.2X" % response[20] + "%0.2X" % response[19]
-                + "%0.2X" % response[18] + "%0.2X" % response[17]
-                + "%0.2X" % response[16] + "%0.2X" % response[15]
-                + "%0.2X" % response[14] + "%0.2X" % response[13])
-
-    tiser.close()
-
-
-    #print  "I am getting" , ID
-    if first_time == 1:
-        ts = time.time()     # ts is the time
-        if (ID != prev_ID):               # To look for the edge transitions
-            if ID == 0:                   # It is not equal and it changed to zero now that means there is a positive to negative transition
-                neg_array.append(ts)
-                if (len(neg_array) > size_of_arrays):
-                    neg_array.pop(0)
-            else:                         # else it is a negative to positive transitions
-                pos_array.append(ts)
-                if (len(pos_array) > size_of_arrays):
-                    pos_array.pop(0)
-
-    if n < num_of_times:
-        threading.Timer(0.125, foo).start()
-        #print pos_array
-        #print 'doing it'    # for debugging information
-        if (len(pos_array) > 2):
-            for n in range(1,len(pos_array)):
-                frequency =  (1/(pos_array[n]-pos_array[n-1]))
-                frequency_array.append(frequency)
-                #print frequency
-                if (len(frequency_array) > size_of_arrays):
-                    frequency_array.pop(0)
-
-
-    prev_ID = ID     # to look at the one to zero and zero to one transitions
-    first_time = 1
-
-
-=======
     #Continuos execution loop to calculate
     while(True):
 
@@ -211,16 +138,16 @@ def main():
                     prev_ID = ID     # to look at the one to zero and zero to one transitions
 
                     ID = str("0x%0.2X" % response[20] + "%0.2X" % response[19]
-                            + "%0.2X" % response[18] + "%0.2X" % response[17]
-                            + "%0.2X" % response[16] + "%0.2X" % response[15]
-                            + "%0.2X" % response[14] + "%0.2X" % response[13])
+                             + "%0.2X" % response[18] + "%0.2X" % response[17]
+                             + "%0.2X" % response[16] + "%0.2X" % response[15]
+                             + "%0.2X" % response[14] + "%0.2X" % response[13])
 
-                    if (ID != prev_ID):            # To look for the edge transitions
-                        if (ID != 0):              # It is not equal and it changed to zero now that means there is a positive to negative transition
-                            ts = time.time()       # ts is the time
-                            pos_array.append(ts)
-                            if (len(pos_array) > size_of_pos_edges_array):
-                                pos_array.pop(0)
+                    #if (ID != prev_ID):            # To look for the edge transitions
+                    #    if (ID != 0):              # It is not equal and it changed to zero now that means there is a positive to negative transition
+                    #        ts = time.time()       # ts is the time
+                    #        pos_array.append(ts)
+                    #        if (len(pos_array) > size_of_pos_edges_array):
+                    #            pos_array.pop(0)
 
                 else:
                     ID = 0
@@ -231,30 +158,25 @@ def main():
                 if (len(all_values_array) > size_of_arrays):
                     all_values_array.pop(0)
 
+                #filter the glitches
                 filtered_all_values_array = filter_glitches(all_values_array)
 
                 #We will wait until the edges array is full
-                if( len(filtered_all_values_array) => size_of_pos_edges_array):
-                    if((filtered_all_values_array[0] == 0) and (filtered_all_values_array[1] != 0)):
-                        #load the edge
-                        #TODO
-                        #then load the next edge
-                        #TODO
-                        #then calculate the frecuency
-                        frequency = (1/(filtered_all_values_array[0]-filtered_all_values_array[1]))
-                        frequency_array.append(frequency)
-                            if (len(frequency_array) > size_of_arrays):
-                                frequency_array.pop(0)
-
+                if(len(filtered_all_values_array) >= size_of_arrays):
+                    if((filtered_all_values_array[0] == 0) and (filtered_all_values_array[1] != 0)): #This line is a pos edge detection
+                        #load the edge array
+                        pos_array.append(filtered_all_values_array[1])
+                        if (len(pos_array) > size_of_pos_edges_array): # Keep the value of the array up to the maximum
+                            pos_array.pop(0)
 
                 #Here we populate the frequency_array which contains all the samples
-                #if (len(pos_array) > 2):
-                #    for n in range(1,len(pos_array)):
-                #        frequency =  (1/(pos_array[n]-pos_array[n-1]))
-                #        frequency_array.append(frequency)
-                #        #print frequency
-                #        if (len(frequency_array) > size_of_arrays):
-                #            frequency_array.pop(0)
+                if (len(pos_array) > 2):
+                    for n in range(1,len(pos_array)):
+                        frequency = (1/(pos_array[n]-pos_array[n-1]))
+                        frequency_array.append(frequency)
+                        #print frequency
+                        if (len(frequency_array) > size_of_arrays):
+                            frequency_array.pop(0)
 
                 #print  "I am getting" , ID
 
@@ -264,6 +186,8 @@ def main():
             tiser.close() # close and turn down the light
             break # Exit while(True)
 
+    #end of while(True)
+    sys.exit()
 
 #-------------------------------------------------------------------
 # Function: freq_print
@@ -273,20 +197,15 @@ def main():
 # the idea is to eliminate the farmost values of the sampling
 #
 #-------------------------------------------------------------------
->>>>>>> 5c699b23bd2ce5e75b6fba905d513a6ac64c3fb3
 def freq_print():
 
     global frequency_array
     global pos_array
     frequency = 0
     new_frequency_array =[] # to hold the values
-<<<<<<< HEAD
-    print pos_array
-=======
 
     #print frequency_array
 
->>>>>>> 5c699b23bd2ce5e75b6fba905d513a6ac64c3fb3
     if (len(frequency_array) > 6):
         #print 'yes'
         new_frequency_array = sorted(frequency_array)
@@ -329,13 +248,14 @@ def f_2_t(freq):
 # as input. The array element are time stamps
 #
 #-------------------------------------------------------------------
-def filter_glitches(unfiltered_array)
+def filter_glitches(unfiltered_array):
 
     filtered_array = unfiltered_array # array to be returned
 
     if (len(filtered_array) > 3): #safety check
         if((filtered_array[-1] != 0) and (filtered_array[-2] == 0) and (filtered_array[-3] != 0)):
             filtered_array[-2] = filtered_array[-1] + ((filtered_array[-3] - filtered_array[-1])/2)
+
     return filtered_array
 
 # ++++++++++++++++++++++  main ++++++++++++++++++++++++++++++++++++++++
