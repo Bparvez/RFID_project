@@ -148,18 +148,22 @@ def main():
                     #        pos_array.append(ts)
                     #        if (len(pos_array) > size_of_pos_edges_array):
                     #            pos_array.pop(0)
+                    ts = time.time()       # ts is the time
 
                 else:
                     ID = 0
+                    ts = 0
 
                 #Build the all values array to be filtered
-                ts = time.time()       # ts is the time
                 all_values_array.append(ts)
                 if (len(all_values_array) > size_of_arrays):
                     all_values_array.pop(0)
+                #print all_values_array 
 
                 #filter the glitches
                 filtered_all_values_array = filter_glitches(all_values_array)
+
+                print filtered_all_values_array 
 
                 #We will wait until the edges array is full
                 if(len(filtered_all_values_array) >= size_of_arrays):
