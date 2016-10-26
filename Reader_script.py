@@ -1,5 +1,26 @@
 #!/usr/bin/env python
 
+
+#
+#    This program is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation, either version 3 of the License, or
+#    (at your option) any later version.
+#
+#    This program is distributed in the hope that it will be useful,
+#   but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+# Mark T. Smith 2016
+#
+
+
+# This code is for using an OOK on a temperature sensor 
+
 import io                  # importing python libraries
 import sys
 import serial              # for the timer and the duration of the loop
@@ -22,8 +43,8 @@ f_array = [ 0.0709,  0.0949,  0.1255,  0.1643,  0.2129, 0.2732, 0.3477, 0.4386, 
 
 
 #-------------------------------------------------------------------
-# Function: main 
-# Description: 
+# Function: main
+# Description:
 #
 #-------------------------------------------------------------------
 def main():
@@ -169,7 +190,7 @@ def main():
                 print ("No data returned.  Is the reader turned on?")
                 #tiser.close()
                 #sys.exit()
-            
+
             else:
                 line_data = tiser.read((ord(line_size[1]) - 2))  # get the rest of the reply
 
@@ -211,9 +232,9 @@ def main():
                     all_values_array.pop(0)
 
                 filtered_all_values_array = filter_glitches(all_values_array)
-                 
+
                 #We will wait until the edges array is full
-                if( len(filtered_all_values_array) => size_of_pos_edges_array): 
+                if( len(filtered_all_values_array) => size_of_pos_edges_array):
                     if((filtered_all_values_array[0] == 0) and (filtered_all_values_array[1] != 0)):
                         #load the edge
                         #TODO
@@ -225,7 +246,7 @@ def main():
                             if (len(frequency_array) > size_of_arrays):
                                 frequency_array.pop(0)
 
-                
+
                 #Here we populate the frequency_array which contains all the samples
                 #if (len(pos_array) > 2):
                 #    for n in range(1,len(pos_array)):
@@ -262,7 +283,7 @@ def freq_print():
 <<<<<<< HEAD
     print pos_array
 =======
-    
+
     #print frequency_array
 
 >>>>>>> 5c699b23bd2ce5e75b6fba905d513a6ac64c3fb3
@@ -276,7 +297,7 @@ def freq_print():
         #print 'Temperature is ' , Temperature
 
 #-------------------------------------------------------------------
-# Function: f_2_t 
+# Function: f_2_t
 # Description: calculate the temperature with the LUT with frequency
 # as input.
 #
@@ -303,17 +324,17 @@ def f_2_t(freq):
     return temp
 
 #-------------------------------------------------------------------
-# Function: filter 
-# Description: filter low frecuency glitches from the samples 
-# as input. The array element are time stamps 
+# Function: filter
+# Description: filter low frecuency glitches from the samples
+# as input. The array element are time stamps
 #
 #-------------------------------------------------------------------
 def filter_glitches(unfiltered_array)
 
-    filtered_array = unfiltered_array # array to be returned  
+    filtered_array = unfiltered_array # array to be returned
 
     if (len(filtered_array) > 3): #safety check
-        if((filtered_array[-1] != 0) and (filtered_array[-2] == 0) and (filtered_array[-3] != 0)): 
+        if((filtered_array[-1] != 0) and (filtered_array[-2] == 0) and (filtered_array[-3] != 0)):
             filtered_array[-2] = filtered_array[-1] + ((filtered_array[-3] - filtered_array[-1])/2)
     return filtered_array
 
