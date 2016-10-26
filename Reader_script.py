@@ -140,7 +140,8 @@ def foo():
 
     if n < num_of_times:
         threading.Timer(0.125, foo).start()
-        #print frequency_array
+        #print pos_array
+        #print 'doing it'    # for debugging information
         if (len(pos_array) > 2):
             for n in range(1,len(pos_array)):
                 frequency =  (1/(pos_array[n]-pos_array[n-1]))
@@ -157,11 +158,12 @@ def foo():
 def freq_print():
     #print 'yes'
     global frequency_array
+    global pos_array
     frequency = 0
     new_frequency_array =[] # to hold the values
-    #print frequency_array
+    print pos_array
     if (len(frequency_array) > 6):
-        print 'yes'
+        #print 'yes'
         new_frequency_array = sorted(frequency_array)
         new_frequency_array = new_frequency_array[2:(len(new_frequency_array)- 2)]
         frequency = np.mean(new_frequency_array)
