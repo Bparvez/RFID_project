@@ -15,7 +15,7 @@
 #
 
 
-# This code is for using an OOK on a temperature sensor 
+# This code is for using an OOK on a temperature sensor
 
 import io                  # importing python libraries
 import sys
@@ -23,6 +23,7 @@ import serial              # for the timer and the duration of the loop
 import time, threading     # for time stamping and threading
 import numpy as np         # for the mean
 import os
+from Tkinter import *   # for the Gui
 
 size_of_arrays = 10
 size_of_pos_edges_array = 10
@@ -36,10 +37,19 @@ n = 0  # int to terminate the loop after some number of times, and for the array
 ID = 0 # initilize the global int ID to zero
 prev_ID = 0 # Initialize the global int prev_ID to zero for comparing the positive to negative edge
 first_time = 0 # to not make the detection for the first time
+top = Tk()
+text1 = Text(top, height=20, width=50) # for making the variable global
+var = StringVar()
+var.set('0')
+Temperature = 0 # Initializing the global temperature to zero , for the gui
+
+WINDOW_W = 500      # variables for our display window
+WINDOW_H = 100
 
 #LUT for frecuencty to temp conversion
 t_array = [ -40, -35, -30, -25, -20, -15, -10, -5, 0, 5, 10, 15,  20,  25,  30, 35, 40, 45, 50, 55, 60,  65, 70, 75, 80, 85, 90, 95, 100, 105, 110, 115, 120, 125, 130, 135, 140, 145, 150]
-f_array = [ 0.015, 0.020, 0.027, 0.035, 0.045, 0.058, 0.074, 0.093, 0.117, 0.145, 0.179, 0.219, 0.267, 0.323, 0.389, 0.466, 0.554, 0.656, 0.774, 0.908, 1.060, 1.233, 1.429, 1.649, 1.896, 2.172, 2.480, 2.822, 3.202, 3.621, 4.083, 4.593, 5.149, 5.764, 6.428, 7.154, 7.945, 8.787, 9.710] 
+f_array = [ 0.015, 0.020, 0.027, 0.035, 0.045, 0.058, 0.074, 0.093, 0.117, 0.145, 0.179, 0.219, 0.267, 0.323, 0.389, 0.466, 0.554, 0.656, 0.774, 0.908, 1.060, 1.233, 1.429, 1.649, 1.896, 2.172, 2.480, 2.822, 3.202, 3.621, 4.083, 4.593, 5.149, 5.764, 6.428, 7.154, 7.945, 8.787, 9.710]
+
 
 #-------------------------------------------------------------------
 # Function: main
@@ -57,6 +67,7 @@ def main():
     global ID , prev_ID
     global first_time
     global frequency_array
+    global Temperature
 
     ID = 0       # Initialize ID to zero for the next thread
 
@@ -102,7 +113,24 @@ def main():
     command[command_len - 2] = chksum  # 1st byte is the checksum
     command[command_len - 1] = chksum ^ 0xff  # 2nd byte is ones comp of the checksum
 
+
+    ### for GUI
+
+    # for the top most Text
+    canvas = Canvas(top, width=WINDOW_W, height=WINDOW_H)
+    canvas.pack()
+    text1.tag_configure('big', font=('Verdana', 20, 'bold'))
+    text1.insert(END,'\nTemperature Sensor\n', 'big')
+    text1.pack()
+
+    # for the changing values
+    l = Label(top, textvariable = var)
+    l.pack()
+    # top.mainloop()
+    ### for the GUI
+
     #Continuos execution loop to calculate
+
     while(True):
 
         try:
@@ -165,13 +193,13 @@ def main():
                 all_values_array.append(ts)
                 if (len(all_values_array) > size_of_arrays):
                     all_values_array.pop(0)
-                #print all_values_array 
+                #print all_values_array
 
                 #filter the glitches
                 #filtered_all_values_array = all_values_array
                 filtered_all_values_array = filter_glitches(all_values_array)
 
-                #print filtered_all_values_array 
+                #print filtered_all_values_array
 
                 #We will wait until the edges array is full
                 if(len(filtered_all_values_array) >= size_of_arrays):
@@ -215,6 +243,8 @@ def freq_print():
 
     global frequency_array
     global pos_array
+    global Temperature
+    global text1
     frequency = 0
     new_frequency_array =[] # to hold the values
 
@@ -231,6 +261,8 @@ def freq_print():
         print 'Frequency is ' , frequency
         Temperature = f_2_t(frequency)
         print 'Temperature is ' , Temperature
+        var.set(str(Temperature))
+        top.update_idletasks()         # for updating the displayed values, to be used in the timer loop
 
 #-------------------------------------------------------------------
 # Function: f_2_t
@@ -247,7 +279,7 @@ def f_2_t(freq):
             done = True
 
         if((freq >= f_array[i]) and (freq <= f_array[i+1])):
-            temp = ((freq-f_array[i]) * (5.0 / (f_array[i+1] - f_array[i])) ) + t_array[i] 
+            temp = ((freq-f_array[i]) * (5.0 / (f_array[i+1] - f_array[i])) ) + t_array[i]
             done = True
 
     if(freq == f_array[-1]):  #compare with the last element
