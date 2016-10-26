@@ -3,11 +3,16 @@
 # Gui for the code
 
 from Tkinter import *
-top = Tk()
+from time import sleep
 
+root = Tk()
 var = StringVar()
-label = Label(top, textvariable=var, relief=RAISED , anchor=CENTER)
+var.set('hello')
 
-var.set("1")
-label.pack()
-top.mainloop()
+l = Label(root, textvariable = var)
+l.pack()
+
+for i in range(6):
+    sleep(1) # Need this to slow the changes down
+    var.set('goodbye' if i%2 else 'hello')
+    root.update_idletasks()

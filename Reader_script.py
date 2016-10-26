@@ -23,7 +23,11 @@ import serial              # for the timer and the duration of the loop
 import time, threading     # for time stamping and threading
 import numpy as np         # for the mean
 import os
+<<<<<<< HEAD
 from Tkinter import *   # for the Gui
+=======
+import argparse
+>>>>>>> 3eb28755e146b3c8093e3349e9b8c98e3710767f
 
 size_of_arrays = 10
 size_of_pos_edges_array = 10
@@ -57,7 +61,7 @@ f_array = [ 0.015, 0.020, 0.027, 0.035, 0.045, 0.058, 0.074, 0.093, 0.117, 0.145
 # serial line to TI S6350 RFID reader
 #
 #-------------------------------------------------------------------
-def main():
+def main(args):
 
     num_of_times = 100
     frequency = 0
@@ -71,18 +75,15 @@ def main():
 
     ID = 0       # Initialize ID to zero for the next thread
 
-    if len(sys.argv) < 2 :
-        print ("Usage: " + sys.argv[0] + " serial_port_to_use")
-        sys.exit()
+    #if len(sys.argv) < 2 :
+    #    print ("Usage: " + sys.argv[0] + " serial_port_to_use")
+    #    sys.exit()
 
     try:
-        tiser = serial.Serial(sys.argv[1], baudrate=57600, bytesize=8,
+        tiser = serial.Serial(args.device_handler, baudrate=57600, bytesize=8,
             parity='N', stopbits=1, timeout=2, xonxoff=0, rtscts=0, dsrdtr=0)
     except:
-        print ("Usage: " + sys.argv[0] + " serial_port_to_use")
-        print ("Can't open " + sys.argv[1] + ".")
-        print ("Under linux or Apple OS you need the full path, ie /dev/ttyUSB0.")
-        print ("Under windows use the communication port name, ie COM8")
+        print ("ERROR: Unable to open serial device " + args.device_handler + " (Please check user rights)")
         sys.exit()
 
     read_transponder_details = [0x01, 0, 0, 0, 0, 0, 0x60]  # the ISO wrapper
@@ -171,12 +172,6 @@ def main():
                              + "%0.2X" % response[16] + "%0.2X" % response[15]
                              + "%0.2X" % response[14] + "%0.2X" % response[13])
 
-                    #if (ID != prev_ID):            # To look for the edge transitions
-                    #    if (ID != 0):              # It is not equal and it changed to zero now that means there is a positive to negative transition
-                    #        ts = time.time()       # ts is the time
-                    #        pos_array.append(ts)
-                    #        if (len(pos_array) > size_of_pos_edges_array):
-                    #            pos_array.pop(0)
                     ts = time.time()       # ts is the time
                     wave_form.append("|")
                 else:
@@ -196,8 +191,10 @@ def main():
                 #print all_values_array
 
                 #filter the glitches
-                #filtered_all_values_array = all_values_array
-                filtered_all_values_array = filter_glitches(all_values_array)
+                if (args.bypass_filter == True):
+                    filtered_all_values_array = all_values_array
+                else:
+                    filtered_all_values_array = filter_glitches(all_values_array)
 
                 #print filtered_all_values_array
 
@@ -307,5 +304,39 @@ def filter_glitches(unfiltered_array):
 
     return filtered_array
 
+
+#-------------------------------------------------------------------
+# Function: parse_args
+# Description: parse the input arguments of the script 
+#-------------------------------------------------------------------
+def parse_args():
+
+    parser = argparse.ArgumentParser(description='Reader controller for OOK over TI S6350 RFID reader')
+
+
+    parser.add_argument('-d', '--device-handler', type=str, required=True,
+                        help='Name of the device handler ie /dev/ttyUSB0 in Unix systems')
+
+    parser.add_argument('--bypass-filter', default=True,
+                        action='store_false', help='Bypass the one glitch filter')
+
+    #parser.add_argument('--target-q-max-age', default=10000, type=int,
+    #                    metavar='STEPS',
+    #                    help='how often target network is updated')
+    #parser.add_argument('--replay-memory-size', default=1000, type=int,
+    #                    metavar='N',
+    #                    help='how many positions are saved in replay memory')
+    #parser.add_argument('--replay-sample-size', default=32, type=int,
+    #                    metavar='N',
+    #                    help='how many positions are in one minibatch')
+    #parser.add_argument('--discount-factor', default=0.99, type=float,
+    #                    help='how future rewards are discounted')
+
+    return parser.parse_args()
+
 # ++++++++++++++++++++++  main ++++++++++++++++++++++++++++++++++++++++
-main()
+args = parse_args()
+main(args)
+
+
+
