@@ -23,12 +23,9 @@ import serial              # for the timer and the duration of the loop
 import time, threading     # for time stamping and threading
 import numpy as np         # for the mean
 import os
-<<<<<<< HEAD
 from Tkinter import *   # for the Gui
-=======
-import argparse
->>>>>>> 3eb28755e146b3c8093e3349e9b8c98e3710767f
 
+import argparse  # for the parser
 size_of_arrays = 10
 size_of_pos_edges_array = 10
 pos_array = list()   # array to store time stamped negative to positive edge/change values
@@ -42,13 +39,23 @@ ID = 0 # initilize the global int ID to zero
 prev_ID = 0 # Initialize the global int prev_ID to zero for comparing the positive to negative edge
 first_time = 0 # to not make the detection for the first time
 top = Tk()
-text1 = Text(top, height=20, width=50) # for making the variable global
+
 var = StringVar()
 var.set('0')
 Temperature = 0 # Initializing the global temperature to zero , for the gui
 
-WINDOW_W = 500      # variables for our display window
+WINDOW_W = 300      # variables for our display window
 WINDOW_H = 100
+                    #Set colours
+                    # R G B
+BLACK = '#000000'
+BRIGHTRED = '#ff0000'
+RED = '#9b0000'
+
+#Set display sizes
+BUTTON_SIZE = 100
+NUM_BUTTON = 10
+MARGIN = 5
 
 #LUT for frecuencty to temp conversion
 t_array = [ -40, -35, -30, -25, -20, -15, -10, -5, 0, 5, 10, 15,  20,  25,  30, 35, 40, 45, 50, 55, 60,  65, 70, 75, 80, 85, 90, 95, 100, 105, 110, 115, 120, 125, 130, 135, 140, 145, 150]
@@ -118,15 +125,19 @@ def main(args):
     ### for GUI
 
     # for the top most Text
-    canvas = Canvas(top, width=WINDOW_W, height=WINDOW_H)
+
+    canvas = Canvas(top, width=WINDOW_W, height=WINDOW_H, background=BLACK)
     canvas.pack()
-    text1.tag_configure('big', font=('Verdana', 20, 'bold'))
+    text1 = Text(top, height=10, width=WINDOW_W) # for making the variable globalt
+    text1.tag_configure('big', font=('Verdana', 10, 'bold'))
     text1.insert(END,'\nTemperature Sensor\n', 'big')
     text1.pack()
-
     # for the changing values
     l = Label(top, textvariable = var)
     l.pack()
+    light = []
+    x = MARGIN+((MARGIN+BUTTON_SIZE)*i)
+    light.append(canvas.create_rectangle(x,MARGIN,x+BUTTON_SIZE,BUTTON_SIZE+MARGIN,fill=RED))
     # top.mainloop()
     ### for the GUI
 
@@ -307,7 +318,7 @@ def filter_glitches(unfiltered_array):
 
 #-------------------------------------------------------------------
 # Function: parse_args
-# Description: parse the input arguments of the script 
+# Description: parse the input arguments of the script
 #-------------------------------------------------------------------
 def parse_args():
 
@@ -337,6 +348,3 @@ def parse_args():
 # ++++++++++++++++++++++  main ++++++++++++++++++++++++++++++++++++++++
 args = parse_args()
 main(args)
-
-
-

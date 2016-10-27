@@ -1,18 +1,15 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 
-# Gui for the code
-
-from Tkinter import *
-from time import sleep
-
+from Tkinter  import *
 root = Tk()
-var = StringVar()
-var.set('hello')
+colour = StringVar()
+colour.set('blue')
+def colourUpdate():
+    l.config(fg='red')
+    root.update()
 
-l = Label(root, textvariable = var)
+btn = Button(root, text = "Click Me", command = colourUpdate)
+l = Label(root, textvariable=colour, fg = colour.get())
 l.pack()
-
-for i in range(6):
-    sleep(1) # Need this to slow the changes down
-    var.set('goodbye' if i%2 else 'hello')
-    root.update_idletasks()
+btn.pack()
+root.mainloop()
